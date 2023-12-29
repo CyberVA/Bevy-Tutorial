@@ -1,7 +1,19 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, transform::commands};
 
 use super::resources::*;
 use crate::events::*;
+
+pub fn insert_score(
+    mut commands: Commands,
+) {
+    commands.insert_resource(Score::default());
+}
+
+pub fn remove_score (
+    mut commands: Commands,
+) {
+    commands.remove_resource::<Score>();
+}
 
 pub fn update_score(
     score: Res<Score>,

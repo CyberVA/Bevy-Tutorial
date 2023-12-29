@@ -1,6 +1,6 @@
-use bevy::{prelude::*, window::PrimaryWindow, app::AppExit};
+use bevy::{prelude::*, window::PrimaryWindow, app::AppExit, transform::commands};
 
-use crate::events::*;
+use crate::{events::*, AppState, game::SimulationState};
 
 pub fn spawn_camera(
     mut commands: Commands,
@@ -15,6 +15,33 @@ pub fn spawn_camera(
     );
 }
 
+pub fn transition_to_game_state (
+    mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    app_state: Res<State<AppState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::G) {
+        if app_state.get().clone() != AppState::Game {
+        commands.insert_resource(NextState(Some(AppState::Game)));
+        println!("Entered Game State");
+        }
+    }
+}
+
+pub fn transition_to_main_menu_state (
+    mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    app_state: Res<State<AppState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::M) {
+        if app_state.get().clone() != AppState::MainMenu {
+        commands.insert_resource(NextState(Some(AppState::MainMenu)));
+        commands.insert_resource(NextState(Some(SimulationState::Paused)));
+        println!("Entered Main Menu State");
+        }
+    }
+}
+
 pub fn exit_game (
     keyboard_input: Res<Input<KeyCode>>,
     mut app_exit_event_writer: EventWriter<AppExit>,
@@ -26,9 +53,11 @@ pub fn exit_game (
 }
 
 pub fn handle_gameover (
+    mut commands: Commands,
     mut game_over_event_reader: EventReader<GameOver>,
 ) {
     for event in game_over_event_reader.read() {
         println!("Game Over! Your score is: {}", event.score.to_string());
+        commands.insert_resource(NextState(Some(AppState::GameOver)));
     }
 }
