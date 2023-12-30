@@ -5,16 +5,29 @@ use super::components::*;
 use super::resources::*;
 use super::{NUMBER_OF_ENEMIES, ENEMY_SIZE, ENEMY_SPEED};
 
+use crate::game::player::components::Player;
+use crate::game::player::{PLAYER_SIZE};
+
 pub fn spawn_enemies (
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
+    player_query: Query<&Transform, With<Player>>,
 ) {
     let window = window_query.get_single().unwrap();
 
     for _ in 0..NUMBER_OF_ENEMIES {
-        let random_x = random::<f32>() * window.width();
-        let random_y = random::<f32>() * window.height();
+        let mut random_x = random::<f32>() * window.width();
+        let mut random_y = random::<f32>() * window.height();
+
+        if let Ok (player_transform) = player_query.get_single() {
+            let mut distance = player_transform.translation.distance(Vec3::new(random_x, random_y, 0.0));
+            while distance < PLAYER_SIZE * 4.0 {
+                random_x = random::<f32>() * window.width();
+                random_y = random::<f32>() * window.height();
+                distance = player_transform.translation.distance(Vec3::new(random_x, random_y, 0.0));
+            }
+        };
 
         commands.spawn( (
             SpriteBundle {
@@ -133,14 +146,25 @@ pub fn tick_enemy_spawn_timer (
 pub fn spawn_enemies_over_time (
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
+    player_query: Query<&Transform, With<Player>>,
     asset_server: Res<AssetServer>,
     enemy_spawn_timer: Res<EnemySpawnTimer>,
 ) {
     if enemy_spawn_timer.timer.finished() {
         let window = window_query.get_single().unwrap();
 
-        let random_x = random::<f32>() * window.width();
-        let random_y = random::<f32>() * window.height();
+        let mut random_x = random::<f32>() * window.width();
+        let mut random_y = random::<f32>() * window.height();
+
+        if let Ok (player_transform) = player_query.get_single() {
+            let mut distance = player_transform.translation.distance(Vec3::new(random_x, random_y, 0.0));
+            while distance < PLAYER_SIZE * 4.0 {
+                random_x = random::<f32>() * window.width();
+                random_y = random::<f32>() * window.height();
+                distance = player_transform.translation.distance(Vec3::new(random_x, random_y, 0.0));
+                println!("Reset enemy spawn position");
+            }
+        };
 
         commands.spawn(( SpriteBundle {
                 transform: Transform::from_xyz(random_x, random_y, 0.0),

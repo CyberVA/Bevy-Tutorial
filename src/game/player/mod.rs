@@ -7,6 +7,9 @@ use systems::*;
 use super::SimulationState;
 use crate::AppState;
 
+pub const PLAYER_SIZE: f32 = 64.0; // Player sprite size
+pub const PLAYER_SPEED: f32 = 500.0; // Player speed
+
 // System Sets
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MovementSystemSet;
